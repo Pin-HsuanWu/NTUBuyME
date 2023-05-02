@@ -1,11 +1,7 @@
 import { ChatBoxModel, MessageModel, UserModel } from './models/BuyMe'
 
 const sendData = (data, ws) => {
-    if (ws.readyState === 1) {
-        ws.send(JSON.stringify(data))
-    } else {
-        //do something
-    }
+    ws.send(JSON.stringify(data))
 }
 
 const chatBoxes = {} // chatBoxes[chatBoxName] = ws
@@ -49,6 +45,7 @@ export default {
             }
 
             case 'FULFILL': {
+                console.log(payload)
                 const { id } = payload
                 chatBoxes[ws.box].forEach((ws) => {
                     sendData(['fulfill', id], ws)

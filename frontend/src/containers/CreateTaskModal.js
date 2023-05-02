@@ -35,6 +35,7 @@ const CreateTaskModal = ({ open, onCreate, onCancel }) => {
             onOk={() => {
                 form.validateFields().then((values) => {
                     onCreate(values)
+                    form.resetFields()
                 })
             }}
         >

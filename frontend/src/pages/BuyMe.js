@@ -170,7 +170,7 @@ const BuyMe = () => {
                         setCreateTaskModalOpen(true)
                     }}
                 >
-                    + Create New Task
+                    + 新增任務
                 </Button>
                 <CreateTaskModal
                     open={CreateTaskModalOpen}
@@ -209,7 +209,7 @@ const BuyMe = () => {
                 >
                     <Typography.Link onClick={(e) => e.preventDefault()}>
                         <Space>
-                            Filter By
+                            Sort By
                             <DownOutlined />
                         </Space>
                     </Typography.Link>

@@ -147,12 +147,12 @@ function MyTasks({ collapsed, setCollapsed }) {
                     onChange={onChange}
                     items={[
                         {
-                            label: `Tasks I added`,
+                            label: `已新增任務`,
                             key: '1',
                             children: addedTasks,
                         },
                         {
-                            label: `Tasks I accepted`,
+                            label: `已接受任務`,
                             key: '2',
                             children: acceptedTasks,
                         },

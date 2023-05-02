@@ -4,16 +4,19 @@
 
 ### 影片連結：
 
+https://youtu.be/WKg2YewF5cQ
+
+### Deploy 連結
+
+https://ntubuyme.up.railway.app/
+
+-   操作方式：可以使用「R11725063 密碼：1111」、「R11725051 密碼：1111」兩個帳號進行測試
+
 ### 組員：
 
 -   R11725063 蔡立倫
 -   R11725051 賴彥良
 -   R11725058 吳品萱
-
-### Deployed 連結：
-
--   link：ntubuyme.up.railway.app
--   操作方式：可以使用「R11725063 密碼：1111」、「R11725051 密碼：1111」兩個帳號進行測試
 
 ### 什麼是 NTU BuyMe？
 
@@ -56,18 +59,25 @@
 ### 如何在 localhost 安裝與測試之詳細步驟
 
     安裝：
-    1. yarn install
-    2. cd frontend && yarn install
-    3. cd backend && yarn install
+    1. yarn
+    2. cd frontend && yarn
+    3. cd backend && yarn
+    4. 同時需放入自己的 .env 檔於 backend 資料夾中
 
     測試：
-    1. 於根目錄下 yarn server
-    2. 於根目錄下 yarn start
-    3. 進入 localhost://3000 進行測試
-    4. 為方便測試用途，可以使用「R11725063 密碼：1111」、「R11725051 密碼：1111」兩個帳號進行測試
+    5. 於根目錄下 yarn server
+    6. 於根目錄下 yarn start
+    7. 進入 localhost://3000 進行測試
+    8. 可以自行創立兩個帳號進行測試，範例如下
+       1. Name：Law
+       2. Id：R11725013
+       3. Password：1111
+       4. Bank id：812 台新銀行
+       5. 11111111
+    9. 若是 deploy 連結測試，可以使用「R11725063，密碼：1111」、「R11725051，密碼：1111」進行測試
 
     功能測試：
-    1.
+    可如影片 demo 所示，創建帳號之後測試 create task、接單、chat、transfer 等各功能
 
 ### 每位組員之負責項目 (請詳述)
 
