@@ -7,9 +7,7 @@ const AppContext = createContext({
     signIn: false,
 })
 
-const WS_URL = process.env.NODE_ENV === 'production'
-    ? `wss://${window.location.host}`
-    : 'ws://localhost:8080'
+const WS_URL = process.env.REACT_APP_WS_URL || `wss://${window.location.host}`
 
 const AppProvider = (props) => {
     const [messages, setMessages] = useState([])
