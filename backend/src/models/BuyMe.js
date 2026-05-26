@@ -33,7 +33,7 @@ const TaskSchema = Schema(
         due_start: { type: Date, required: true },
         due_end: { type: Date, required: true },
         fee: { type: Number, required: true },
-        status: { type: String, required: true }, // 'open', 'accepted', 'completed'
+        status: { type: String, required: true, enum: ['open', 'accepted', 'completed', 'cancelled'], default: 'open' },
     },
 
     { timestamps: true }
