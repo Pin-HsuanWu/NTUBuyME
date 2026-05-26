@@ -1,5 +1,6 @@
 import { UserModel } from '../models/BuyMe'
 import bcrypt from 'bcrypt'
+import { generateToken } from '../middleware/auth'
 
 exports.UserLogin = async (req, res) => {
     const { userId, password } = req.body
@@ -14,11 +15,13 @@ exports.UserLogin = async (req, res) => {
     } else {
         const match = await bcrypt.compare(password, user.password)
         if (match) {
+            const token = generateToken(user.user_id)
             res.status(200).send({
                 message: 'success',
                 content: {
                     name: user.name,
                     id: user.user_id,
+                    token,
                 },
             })
         } else {

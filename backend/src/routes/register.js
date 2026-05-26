@@ -1,5 +1,6 @@
 import { UserModel } from '../models/BuyMe'
 import bcrypt from 'bcrypt'
+import { generateToken } from '../middleware/auth'
 
 const SALT_ROUNDS = 10
 
@@ -20,9 +21,14 @@ exports.UserRegister = async (req, res) => {
                            bankaccount_id: bankaccount_id},
         })
         await user.save()
+        const token = generateToken(id)
         res.status(200).send({
             message: 'success',
-            content: 'Account created!',
+            content: {
+                token,
+                name,
+                id,
+            },
         })
     } else {
         res.send({

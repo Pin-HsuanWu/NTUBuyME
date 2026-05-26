@@ -60,6 +60,7 @@ const Login = ({ setLogin, setCollapsed }) => {
                     alert(content)
                     break
                 case 'success':
+                    localStorage.setItem('token', content.token)
                     setMe(content.name)
                     setLogin(true)
                     setSignIn(true)

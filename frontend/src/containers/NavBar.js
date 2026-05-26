@@ -35,7 +35,7 @@ function NavBar({ collapsed }) {
                 navigate('/account')
                 break
             case '6':
-                //Logout
+                localStorage.removeItem('token')
                 localStorage.setItem(LOCALSTORAGE_STATUS, 'logout')
                 navigate('/login')
                 setStatus({
