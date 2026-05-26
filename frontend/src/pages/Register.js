@@ -37,11 +37,12 @@ const Register = ({ setLogin }) => {
 
         setStatus({
             type: message,
-            msg: content,
+            msg: message === 'success' ? 'Account created!' : content,
         })
         if (message === 'success') {
-            setId(value.user.id)
-            setMe(value.user.name)
+            localStorage.setItem('token', content.token)
+            setId(content.id)
+            setMe(content.name)
             setSignIn(true)
             setLogin(true)
             navigateToMainPage()
