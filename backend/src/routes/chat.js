@@ -1,4 +1,5 @@
 import { ChatBoxModel, UserModel, TaskModel } from '../models/BuyMe'
+import { TASK_STATUS, canTransition } from '../utils/taskStatus'
 
 exports.GetChat = async (req, res) => {
     const id = req.query.id
@@ -22,13 +23,18 @@ exports.FulfillOrder = async (req, res) => {
     const userID = req.body.userID
     const taskID = req.body.taskID
 
+    const task = await TaskModel.findOne({ sender: senderID, receiver: receiverID })
+    if (!task) {
+        return res.status(404).json({ message: 'error', content: 'Task not found' })
+    }
+    if (!canTransition(task.status, TASK_STATUS.COMPLETED)) {
+        return res.status(400).json({ message: 'error', content: 'Invalid status transition' })
+    }
+
     try {
         await TaskModel.findOneAndUpdate(
-            {
-                sender: senderID,
-                receiver: receiverID,
-            },
-            { status: 'completed' }
+            { _id: task._id },
+            { status: TASK_STATUS.COMPLETED }
         )
     } catch (e) {
         console.log(e)

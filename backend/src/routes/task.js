@@ -1,6 +1,7 @@
 import { MessageModel, TaskModel } from '../models/BuyMe'
 import { UserModel } from '../models/BuyMe'
 import { ChatBoxModel } from '../models/BuyMe'
+import { TASK_STATUS, canTransition } from '../utils/taskStatus'
 
 exports.FilterTasksByDueStart = async (req, res) => {
     const nPerPage = req.query.nPerPage
@@ -128,6 +129,11 @@ exports.AcceptTasks = async (req, res) => {
     const { id, receiver } = req.body
     const user = await UserModel.findOne({ user_id: receiver })
     const task = await TaskModel.findOne({ _id: id })
+
+    if (!canTransition(task.status, TASK_STATUS.ACCEPTED)) {
+        return res.status(400).json({ message: 'error', content: 'Invalid status transition' })
+    }
+
     const task_populated = await task.populate({
         path: 'sender',
         select: 'name',
@@ -136,7 +142,7 @@ exports.AcceptTasks = async (req, res) => {
     const chatBoxName = makeName(user.name, senderName)
     await TaskModel.updateOne(
         { _id: id },
-        { receiver: user, status: 'accepted' }
+        { receiver: user, status: TASK_STATUS.ACCEPTED }
     )
     const newChatRoom = new ChatBoxModel({
         name: chatBoxName,
