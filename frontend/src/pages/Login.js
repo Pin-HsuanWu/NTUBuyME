@@ -5,7 +5,6 @@ import { Button, Checkbox, Form, Input, Layout } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import { instance } from '../api'
 
-const bcrypt = require('bcryptjs')
 const { Header, Content } = Layout
 
 const Login = ({ setLogin, setCollapsed }) => {
@@ -47,6 +46,7 @@ const Login = ({ setLogin, setCollapsed }) => {
                 data: { message, content },
             } = await instance.post('/login', {
                 userId: id,
+                password: password,
             })
 
             switch (message) {
@@ -60,32 +60,21 @@ const Login = ({ setLogin, setCollapsed }) => {
                     alert(content)
                     break
                 case 'success':
-                    const result = bcrypt.compareSync(
-                        password,
-                        content.password
+                    setMe(content.name)
+                    setLogin(true)
+                    setSignIn(true)
+                    localStorage.setItem(LOCALSTORAGE_ID_KEY, id)
+                    localStorage.setItem(
+                        LOCALSTORAGE_NAME_KEY,
+                        content.name
                     )
-                    if (result) {
-                        setMe(content.name)
-                        setLogin(true)
-                        setSignIn(true)
-                        localStorage.setItem(LOCALSTORAGE_ID_KEY, id)
-                        localStorage.setItem(
-                            LOCALSTORAGE_NAME_KEY,
-                            content.name
-                        )
-                        localStorage.setItem(LOCALSTORAGE_STATUS, 'login')
-                        setStatus({
-                            type: 'success',
-                            msg: 'Login successfully!',
-                        })
-                        setCollapsed(false)
-                        navigate('/')
-                    } else {
-                        setStatus({
-                            type: 'error',
-                            msg: 'Wrong password!',
-                        })
-                    }
+                    localStorage.setItem(LOCALSTORAGE_STATUS, 'login')
+                    setStatus({
+                        type: 'success',
+                        msg: 'Login successfully!',
+                    })
+                    setCollapsed(false)
+                    navigate('/')
                     break
             }
         }

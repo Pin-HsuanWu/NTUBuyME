@@ -16,14 +16,6 @@ const layout = {
 
 const { Header, Content } = Layout
 
-const bcrypt = require('bcryptjs')
-const saltRounds = 10
-
-const encryptPassword = async (password) => {
-    const salt = await bcrypt.genSalt(saltRounds)
-    const hash = await bcrypt.hash(password, salt)
-    return hash
-}
 
 const Register = ({ setLogin }) => {
     const [password, setPassword] = useState('')
@@ -37,8 +29,6 @@ const Register = ({ setLogin }) => {
     }
 
     const onFinish = async (value) => {
-        const password = value.user.password
-        value.user.password = await encryptPassword(password)
         value.user.id = value.user.id.toUpperCase()
 
         const {

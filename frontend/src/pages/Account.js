@@ -43,61 +43,22 @@ const Account = ({ collapsed, setCollapsed, me, id }) => {
         setAccountInfo(contents)
     }
 
-    // Change Password
-    const bcrypt = require('bcryptjs')
-    const saltRounds = 10
-
-    const encryptPassword = async (password) => {
-        const salt = await bcrypt.genSalt(saltRounds)
-        const hash = await bcrypt.hash(password, salt)
-        return hash
-    }
-
     const changePassword = async (user_id, value) => {
+        if (value.user.newpassword !== value.user.newpasswordcheck) {
+            window.alert('Retype new password does not match new password!')
+            return
+        }
+
         const {
             data: { message, content },
-        } = await instance.post('/login', {
-            userId: user_id,
+        } = await instance.post('/changePassword', {
+            user_id,
+            currentPassword: value.user.currentpassword,
+            newPassword: value.user.newpassword,
         })
 
-        switch (message) {
-            default:
-                break
-
-            case 'error':
-                alert(content)
-                break
-            case 'success': {
-                // check current password
-                const result = bcrypt.compareSync(
-                    value.user.currentpassword,
-                    content.password
-                )
-                if (result) {
-                    // check new password === retype new password
-                    if (
-                        value.user.newpassword === value.user.newpasswordcheck
-                    ) {
-                        // update new password
-                        const newPasswordEncrypted = await encryptPassword(
-                            value.user.newpassword
-                        )
-                        const {
-                            data: { message, content },
-                        } = await instance.post('/changePassword', {
-                            user_id,
-                            newPasswordEncrypted,
-                        })
-                    } else {
-                        window.alert(
-                            'Retype new password does not match new password!'
-                        )
-                    }
-                } else {
-                    window.alert('Current password is not correct!')
-                }
-                break
-            }
+        if (message === 'error') {
+            window.alert(content)
         }
     }
 
