@@ -1,4 +1,7 @@
 import { UserModel } from '../models/BuyMe'
+import bcrypt from 'bcrypt'
+
+const SALT_ROUNDS = 10
 
 exports.GetUserAccount = async (req, res) => {
     const user_id = req.query.user_id
@@ -50,24 +53,22 @@ exports.EditUserAccount = async (req, res) => {
 }
 
 exports.ChangePassword = async (req, res) => {
-    const user_id = req.body.user_id
-    const password = req.body.newPasswordEncrypted
+    const { user_id, currentPassword, newPassword } = req.body
     const existing = await UserModel.findOne({ user_id })
-    if (existing) {
-        try {
-            res.status(200).json({ message: `Updating ${user_id}'s password!` })
-            return UserModel.findOneAndUpdate(
-                {
-                    user_id,
-                },
-                {
-                    password,
-                }
-            )
-        } catch (e) {
-            throw new Error('Password updating error: ' + e)
-        }
-    } else {
-        res.status(204).json({ message: `Account doesn't exist!` })
+    if (!existing) {
+        return res.status(404).json({ message: 'error', content: "Account doesn't exist!" })
+    }
+
+    const match = await bcrypt.compare(currentPassword, existing.password)
+    if (!match) {
+        return res.status(401).json({ message: 'error', content: 'Current password is not correct!' })
+    }
+
+    try {
+        const hashedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS)
+        await UserModel.findOneAndUpdate({ user_id }, { password: hashedPassword })
+        res.status(200).json({ message: 'success', content: `Password updated!` })
+    } catch (e) {
+        throw new Error('Password updating error: ' + e)
     }
 }
