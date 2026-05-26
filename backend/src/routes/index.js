@@ -6,21 +6,45 @@ import buymeRoute from './task'
 import chatRoute from './chat'
 import qrCodeRoute from './qrcode'
 import { authMiddleware } from '../middleware/auth'
+import { body } from 'express-validator'
+import { validate } from '../middleware/validate'
 
 const wrap =
     (fn) =>
     (...args) =>
         fn(...args).catch(args[2])
 
+const loginValidation = [
+    body('userId').notEmpty().withMessage('Student ID is required'),
+    body('password').notEmpty().withMessage('Password is required'),
+    validate,
+]
+
+const registerValidation = [
+    body('user.name').notEmpty().withMessage('Name is required'),
+    body('user.id').notEmpty().withMessage('Student ID is required'),
+    body('user.password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+    body('user.bank_id').notEmpty().withMessage('Bank ID is required'),
+    body('user.bankaccount_id').notEmpty().withMessage('Bank account ID is required'),
+    validate,
+]
+
+const changePasswordValidation = [
+    body('user_id').notEmpty().withMessage('User ID is required'),
+    body('currentPassword').notEmpty().withMessage('Current password is required'),
+    body('newPassword').isLength({ min: 6 }).withMessage('New password must be at least 6 characters'),
+    validate,
+]
+
 function main(app) {
     // Public routes
-    app.post('/api/login', wrap(loginRoute.UserLogin))
-    app.post('/api/register', wrap(registerRoute.UserRegister))
+    app.post('/api/login', loginValidation, wrap(loginRoute.UserLogin))
+    app.post('/api/register', registerValidation, wrap(registerRoute.UserRegister))
 
     // Protected routes
     app.get('/api/account', authMiddleware, wrap(accountRoute.GetUserAccount))
     app.post('/api/account', authMiddleware, wrap(accountRoute.EditUserAccount))
-    app.post('/api/changePassword', authMiddleware, wrap(accountRoute.ChangePassword))
+    app.post('/api/changePassword', authMiddleware, changePasswordValidation, wrap(accountRoute.ChangePassword))
     app.get('/api/transfer', authMiddleware, wrap(transferRoute.GetTransferAccount))
     app.get('/api/getReceiverId', authMiddleware, wrap(transferRoute.GetReceiverId))
     app.get('/api/allTasksByDueStart', authMiddleware, wrap(buymeRoute.FilterTasksByDueStart))
