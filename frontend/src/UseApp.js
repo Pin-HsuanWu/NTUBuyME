@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react'
 import { message } from 'antd'
 
 const AppContext = createContext({
@@ -7,14 +7,12 @@ const AppContext = createContext({
     signIn: false,
 })
 
-const c = new WebSocket('ws://localhost:8080')
+const WS_URL = process.env.REACT_APP_WS_URL || `wss://${window.location.host}`
 
 const AppProvider = (props) => {
     const [messages, setMessages] = useState([])
     const [fulfill, setFulfill] = useState(false)
-    useState('')
     const [status, setStatus] = useState([])
-    const [reconnect, setReconnnect] = useState(false)
     const [signIn, setSignIn] = useState(false)
     const [chats, setChats] = useState([])
     const LOCALSTORAGE_ID_KEY = 'save-id'
@@ -26,29 +24,57 @@ const AppProvider = (props) => {
     const [me, setMe] = useState(savedMe || '')
     const [key, setKey] = useState('1')
 
+    const wsRef = useRef(null)
+    const reconnectTimeout = useRef(null)
+    const backoff = useRef(1000)
+
+    const connectWs = useCallback(() => {
+        const ws = new WebSocket(WS_URL)
+
+        ws.onopen = () => {
+            backoff.current = 1000
+        }
+
+        ws.onmessage = (byteString) => {
+            const { data } = byteString
+            const [task, payload] = JSON.parse(data)
+            switch (task) {
+                case 'chat': {
+                    setChats(payload)
+                    break
+                }
+                case 'message': {
+                    setMessages((prev) => [...prev, payload])
+                    break
+                }
+                case 'fulfill': {
+                    setFulfill(true)
+                    break
+                }
+            }
+        }
+
+        ws.onclose = () => {
+            reconnectTimeout.current = setTimeout(() => {
+                backoff.current = Math.min(backoff.current * 2, 30000)
+                connectWs()
+            }, backoff.current)
+        }
+
+        wsRef.current = ws
+    }, [])
+
+    useEffect(() => {
+        connectWs()
+        return () => {
+            clearTimeout(reconnectTimeout.current)
+            if (wsRef.current) wsRef.current.close()
+        }
+    }, [connectWs])
+
     useEffect(() => {
         displayStatus(status)
     }, [status])
-
-    c.onmessage = (byteString) => {
-        const { data } = byteString
-        const [task, payload] = JSON.parse(data)
-        switch (task) {
-            case 'chat': {
-                setChats(payload)
-                break
-            }
-
-            case 'message': {
-                setMessages([...messages, payload])
-                break
-            }
-
-            case 'fulfill': {
-                setFulfill(true)
-            }
-        }
-    }
 
     const displayStatus = (s) => {
         if (s.msg) {
@@ -70,7 +96,9 @@ const AppProvider = (props) => {
     }
 
     const sendData = (data) => {
-        c.send(JSON.stringify(data))
+        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+            wsRef.current.send(JSON.stringify(data))
+        }
     }
 
     const sendMessage = (me, body, chatBoxName) => {
