@@ -1,13 +1,19 @@
 # NTU BuyME
 
-A peer-to-peer delivery task marketplace for NTU students. Post delivery requests for food from off-campus restaurants, accept tasks from other students, chat in real-time, and pay via bank transfer QR codes.
+A peer-to-peer delivery marketplace built for NTU students.
+
+UberEats and FoodPanda can't deliver inside campus — so we built BuyME. Students post delivery requests for off-campus restaurants, others pick them up for a fee. Chat in real-time to coordinate, then pay instantly via bank transfer QR code.
+
+## Demo
+
+https://youtu.be/WKg2YewF5cQ
 
 ## Features
 
-- **Task Marketplace** — Browse, create, and accept delivery tasks with configurable fees and time windows
-- **Real-time Chat** — WebSocket-based messaging between task requester and fulfiller
-- **Payment QR Codes** — Generate Taiwan bank transfer QR codes for easy payment
-- **Account Management** — Profile settings and bank account configuration
+- **Task Marketplace** — Post or browse delivery tasks with restaurant, fee, and delivery time window
+- **Real-time Chat** — Instant messaging between requester and deliverer once a task is accepted
+- **Payment QR Codes** — Generate Taiwan bank transfer QR codes for seamless payment
+- **Account Management** — Manage profile and bank account settings
 
 ## Tech Stack
 
@@ -29,15 +35,12 @@ A peer-to-peer delivery task marketplace for NTU students. Post delivery request
 ### Installation
 
 ```bash
-# Install all dependencies
 yarn
 cd frontend && yarn
 cd ../backend && yarn
 ```
 
 ### Configuration
-
-Create `backend/.env` based on the example:
 
 ```bash
 cp backend/.env.example backend/.env
@@ -66,40 +69,6 @@ yarn server
 # Start frontend (port 3000)
 yarn start
 ```
-
-## Project Structure
-
-```
-NTUBuyME/
-├── frontend/
-│   └── src/
-│       ├── pages/          # Login, Register, BuyMe, MyTasks, Chat, Transfer, Account
-│       ├── containers/     # NavBar, modals, shared components
-│       ├── UseApp.js       # Global context + WebSocket client
-│       └── api.js          # Axios instance with auth interceptor
-├── backend/
-│   └── src/
-│       ├── server.js       # Express + MongoDB + WebSocket setup
-│       ├── models/         # Mongoose schemas (User, Task, Message, ChatBox)
-│       ├── routes/         # API endpoints
-│       ├── middleware/     # Auth (JWT) and validation
-│       └── utils/          # Helpers (task status machine)
-└── Dockerfile
-```
-
-## API Overview
-
-### Public
-- `POST /api/login` — Authenticate and receive JWT
-- `POST /api/register` — Create account and receive JWT
-
-### Protected (requires `Authorization: Bearer <token>`)
-- `GET /api/account` — Get user profile
-- `POST /api/createTask` — Create a delivery task
-- `POST /api/acceptTask` — Accept an open task
-- `GET /api/allTasksByDueStart` — Browse tasks sorted by due date
-- `GET /api/getChat` — Get chat rooms
-- `GET /api/qrcode` — Generate payment QR code
 
 ## License
 
