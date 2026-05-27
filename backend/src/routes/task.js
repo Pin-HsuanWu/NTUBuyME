@@ -119,6 +119,7 @@ exports.CreateTask = async (req, res) => {
     })
 
     await newTask.save()
+    res.status(201).send({ message: 'success', content: 'Task created' })
 }
 
 exports.AcceptTasks = async (req, res) => {
