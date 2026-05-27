@@ -3,7 +3,6 @@ import cors from 'cors'
 import routes from './routes'
 import mongoose from 'mongoose'
 import WebSocket from 'ws'
-import bodyParser from 'body-parser'
 import http from 'http'
 import wsConnect from './wsConnect'
 import { randomUUID } from 'crypto'
@@ -14,14 +13,12 @@ require('dotenv').config()
 
 const app = express()
 
-// if (process.env.NODE_ENV === "development") {
-//     app.use(cors());
-// }
-app.use(cors())
+app.use(cors({
+    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    credentials: true,
+}))
 
 app.use(express.json())
-// app.use(bodyParser.urlencoded({extended: true}));
-app.use(bodyParser.json())
 
 routes(app)
 
