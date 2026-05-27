@@ -77,9 +77,14 @@ mongoose
             ws.box = ''
             ws.id = randomUUID()
             ws.userId = req.userId
+            wsConnect.registerClient(ws)
             ws.onmessage = wsConnect.onMessage(wss, ws)
+            ws.on('close', () => {
+                wsConnect.unregisterClient(ws)
+            })
             ws.on('error', (err) => {
                 console.warn(`Client disconnected - reason: ${err}`)
+                wsConnect.unregisterClient(ws)
             })
         })
     })

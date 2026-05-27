@@ -1,0 +1,44 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "4000:4000"
+      - "8080:8080"
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/NTUBuyMe
+      - JWT_SECRET=dev-secret-key
+      - REDIS_URL=redis://redis:6379
+      - PORT=4000
+    depends_on:
+      - mongo
+      - redis
+    volumes:
+      - ./backend/src:/app/backend/src
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_WS_URL=ws://localhost:8080
+    volumes:
+      - ./frontend/src:/app/src
+
+  mongo:
+    image: mongo:6
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+volumes:
+  mongo-data:
