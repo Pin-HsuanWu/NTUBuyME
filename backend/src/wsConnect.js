@@ -1,12 +1,43 @@
-import { ChatBoxModel, MessageModel, UserModel } from './models/BuyMe'
+import { ChatBoxModel, MessageModel } from './models/BuyMe'
+import Redis from 'ioredis'
+
+const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379'
+const pub = new Redis(redisUrl)
+const sub = new Redis(redisUrl)
+
+const localClients = new Map()
 
 const sendData = (data, ws) => {
-    ws.send(JSON.stringify(data))
+    if (ws.readyState === 1) {
+        ws.send(JSON.stringify(data))
+    }
 }
 
-const chatBoxes = {} // chatBoxes[chatBoxName] = ws
+const broadcastToRoom = (room, data) => {
+    pub.publish('chat:broadcast', JSON.stringify({ room, data }))
+}
+
+sub.subscribe('chat:broadcast')
+sub.on('message', (channel, message) => {
+    if (channel !== 'chat:broadcast') return
+    const { room, data } = JSON.parse(message)
+    localClients.forEach((ws) => {
+        if (ws.box === room) {
+            sendData(data, ws)
+        }
+    })
+})
 
 export default {
+    registerClient: (ws) => {
+        localClients.set(ws.id, ws)
+    },
+
+    unregisterClient: (ws) => {
+        localClients.delete(ws.id)
+        pub.srem(`room:${ws.box}`, ws.id)
+    },
+
     onMessage: (wss, ws) => async (byteString) => {
         const { data } = byteString
         const [task, payload] = JSON.parse(data)
@@ -20,36 +51,25 @@ export default {
                 } catch (e) {
                     throw new Error('Message DB server error: ' + e)
                 }
-                const chatBox = await ChatBoxModel.findOne({
-                    name: name,
-                })
-
+                const chatBox = await ChatBoxModel.findOne({ name })
                 chatBox.messages = [...chatBox.messages, message]
                 await chatBox.save()
 
-                chatBoxes[ws.box].forEach((ws) => {
-                    sendData(['message', { sender: who, body }], ws)
-                })
+                broadcastToRoom(name, ['message', { sender: who, body }])
                 break
             }
 
             case 'CHAT': {
                 const { name } = payload
                 ws.box = name
-                if (!chatBoxes[ws.box]) {
-                    chatBoxes[ws.box] = [ws]
-                } else if (!chatBoxes[ws.box].includes(ws)) {
-                    chatBoxes[ws.box].push(ws)
-                }
+                await pub.sadd(`room:${name}`, ws.id)
                 break
             }
 
             case 'FULFILL': {
-                console.log(payload)
                 const { id } = payload
-                chatBoxes[ws.box].forEach((ws) => {
-                    sendData(['fulfill', id], ws)
-                })
+                broadcastToRoom(ws.box, ['fulfill', id])
+                break
             }
         }
     },
