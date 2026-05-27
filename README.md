@@ -2,7 +2,7 @@
 
 A peer-to-peer delivery marketplace built for NTU students.
 
-UberEats and FoodPanda can't deliver inside campus — so we built BuyME. Students post delivery requests for off-campus restaurants, others pick them up for a fee. Chat in real-time to coordinate, then pay instantly via bank transfer QR code.
+UberEats and FoodPanda can't deliver inside campus — so we built BuyME. Busy students who don't have time to leave campus can post delivery requests for off-campus restaurants. Meanwhile, students with free time between classes can pick up tasks and earn extra money during gaps in their schedule. Chat in real-time to coordinate, then pay instantly via bank transfer QR code.
 
 ## Demo
 
