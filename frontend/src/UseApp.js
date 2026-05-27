@@ -29,7 +29,9 @@ const AppProvider = (props) => {
     const backoff = useRef(1000)
 
     const connectWs = useCallback(() => {
-        const ws = new WebSocket(WS_URL)
+        const token = localStorage.getItem('token')
+        if (!token) return
+        const ws = new WebSocket(`${WS_URL}?token=${token}`)
 
         ws.onopen = () => {
             backoff.current = 1000

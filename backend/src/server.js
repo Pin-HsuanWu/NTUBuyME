@@ -8,6 +8,7 @@ import http from 'http'
 import wsConnect from './wsConnect'
 import { randomUUID } from 'crypto'
 import path from 'path'
+import jwt from 'jsonwebtoken'
 
 require('dotenv').config()
 
@@ -47,7 +48,23 @@ const port = process.env.PORT || 4000
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 const server = http.createServer(app)
-const wss = new WebSocket.Server({ server })
+const wss = new WebSocket.Server({
+    server,
+    verifyClient: (info, done) => {
+        const url = new URL(info.req.url, `http://${info.req.headers.host}`)
+        const token = url.searchParams.get('token')
+        if (!token) {
+            return done(false, 401, 'No token provided')
+        }
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET)
+            info.req.userId = decoded.userId
+            done(true)
+        } catch (err) {
+            done(false, 401, 'Invalid token')
+        }
+    },
+})
 
 mongoose
     .connect(process.env.MONGO_URL, {
@@ -56,9 +73,10 @@ mongoose
         dbName: 'NTUBuyMe',
     })
     .then((res) => {
-        wss.on('connection', (ws) => {
+        wss.on('connection', (ws, req) => {
             ws.box = ''
             ws.id = randomUUID()
+            ws.userId = req.userId
             ws.onmessage = wsConnect.onMessage(wss, ws)
             ws.on('error', (err) => {
                 console.warn(`Client disconnected - reason: ${err}`)
