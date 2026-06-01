@@ -1,4 +1,5 @@
 import { UserModel } from '../models/BuyMe'
+import { decrypt } from '../utils/crypto'
 
 exports.GetReceiverId = async (req, res) => {
     let user = await UserModel.findOne({ _id: req.query.userObjId })
@@ -31,7 +32,10 @@ exports.GetTransferAccount = async (req, res) => {
             content: {
                 name: user.name,
                 id: user.user_id,
-                bankaccount: user.bankaccount,
+                bankaccount: {
+                    bank_id: decrypt(user.bankaccount.bank_id),
+                    bankaccount_id: decrypt(user.bankaccount.bankaccount_id),
+                },
             },
         })
     }

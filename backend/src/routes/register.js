@@ -1,6 +1,7 @@
 import { UserModel } from '../models/BuyMe'
 import bcrypt from 'bcrypt'
 import { generateToken } from '../middleware/auth'
+import { encrypt } from '../utils/crypto'
 
 const SALT_ROUNDS = 10
 
@@ -17,8 +18,8 @@ exports.UserRegister = async (req, res) => {
             user_id: id,
             name: name,
             password: hashedPassword,
-            bankaccount: { bank_id: bank_id,
-                           bankaccount_id: bankaccount_id},
+            bankaccount: { bank_id: encrypt(bank_id),
+                           bankaccount_id: encrypt(bankaccount_id) },
         })
         await user.save()
         const token = generateToken(id)
