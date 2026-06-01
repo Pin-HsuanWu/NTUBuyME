@@ -6,6 +6,7 @@ import buymeRoute from './task'
 import chatRoute from './chat'
 import qrCodeRoute from './qrcode'
 import { authMiddleware } from '../middleware/auth'
+import { authLimiter, apiLimiter } from '../middleware/rateLimit'
 import { body } from 'express-validator'
 import { validate } from '../middleware/validate'
 
@@ -37,11 +38,12 @@ const changePasswordValidation = [
 ]
 
 function main(app) {
-    // Public routes
-    app.post('/api/login', loginValidation, wrap(loginRoute.UserLogin))
-    app.post('/api/register', registerValidation, wrap(registerRoute.UserRegister))
+    // Public routes (strict rate limit)
+    app.post('/api/login', authLimiter, loginValidation, wrap(loginRoute.UserLogin))
+    app.post('/api/register', authLimiter, registerValidation, wrap(registerRoute.UserRegister))
 
     // Protected routes
+    app.use('/api', apiLimiter)
     app.get('/api/account', authMiddleware, wrap(accountRoute.GetUserAccount))
     app.post('/api/account', authMiddleware, wrap(accountRoute.EditUserAccount))
     app.post('/api/changePassword', authMiddleware, changePasswordValidation, wrap(accountRoute.ChangePassword))
