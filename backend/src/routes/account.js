@@ -1,5 +1,6 @@
 import { UserModel } from '../models/BuyMe'
 import bcrypt from 'bcrypt'
+import { encrypt, decrypt } from '../utils/crypto'
 
 const SALT_ROUNDS = 10
 
@@ -7,7 +8,14 @@ exports.GetUserAccount = async (req, res) => {
     const user_id = req.query.user_id
     let user = await UserModel.findOne({ user_id })
     if (!user) throw new Error('userID not found!')
-    res.send({ data: user })
+    const userData = user.toObject()
+    if (userData.bankaccount) {
+        userData.bankaccount = {
+            bank_id: decrypt(userData.bankaccount.bank_id),
+            bankaccount_id: decrypt(userData.bankaccount.bankaccount_id),
+        }
+    }
+    res.send({ data: userData })
 }
 
 exports.EditUserAccount = async (req, res) => {
@@ -37,8 +45,8 @@ exports.EditUserAccount = async (req, res) => {
                         user_id: req.body.user_id,
                     },
                     {
-                        bankaccount:{ bank_id: newValue[0],
-                                      bankaccount_id: newValue[1]},
+                        bankaccount: { bank_id: encrypt(newValue[0]),
+                                       bankaccount_id: encrypt(newValue[1]) },
                     },
                     {new:true}
                 )

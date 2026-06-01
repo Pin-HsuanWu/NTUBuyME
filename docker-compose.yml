@@ -9,6 +9,7 @@ services:
     environment:
       - MONGO_URL=mongodb://mongo:27017/NTUBuyMe
       - JWT_SECRET=dev-secret-key
+      - ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
       - REDIS_URL=redis://redis:6379
       - PORT=4000
     depends_on:
