@@ -39,6 +39,11 @@ const TaskSchema = Schema(
     { timestamps: true }
 )
 
+TaskSchema.index({ status: 1, due_start: 1 })
+TaskSchema.index({ status: 1, fee: -1 })
+TaskSchema.index({ sender: 1, status: 1, due_end: 1 })
+TaskSchema.index({ receiver: 1, status: 1, due_end: 1 })
+
 const TaskModel = mongoose.model('Task', TaskSchema)
 
 const MessageSchema = new Schema({
@@ -62,6 +67,11 @@ const ChatBoxSchema = new Schema({
     from: { type: String, required: true },
     task_id: { type: mongoose.Types.ObjectId, ref: 'Task', required: true },
 })
+
+ChatBoxSchema.index({ name: 1 }, { unique: true })
+ChatBoxSchema.index({ sender: 1 })
+ChatBoxSchema.index({ receiver: 1 })
+ChatBoxSchema.index({ task_id: 1 })
 
 const ChatBoxModel = mongoose.model('ChatBox', ChatBoxSchema)
 
