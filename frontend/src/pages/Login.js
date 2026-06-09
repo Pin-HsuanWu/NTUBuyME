@@ -1,83 +1,44 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState } from 'react'
 import '../index.css'
-import { useApp } from '../UseApp'
-import { Button, Checkbox, Form, Input, Layout } from 'antd'
+import { useAuth } from '../contexts/AuthContext'
+import { Button, Checkbox, Form, Input, Layout, message as antMessage } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import { instance } from '../api'
 
-const { Header, Content } = Layout
+const { Content } = Layout
 
-const Login = ({ setLogin, setCollapsed }) => {
-    const {
-        me,
-        setMe,
-        status,
-        setStatus,
-        setSignIn,
-        id,
-        setId,
-        LOCALSTORAGE_ID_KEY,
-        LOCALSTORAGE_NAME_KEY,
-        LOCALSTORAGE_STATUS,
-    } = useApp()
+const Login = ({ setCollapsed }) => {
+    const { id, setId, login } = useAuth()
     const [password, setPassword] = useState('')
     const navigate = useNavigate()
 
-    // useEffect(() => {
-    //     if (id === '' || password === '')
-    //         document.getElementById('submit').disabled = true
-    //     else document.getElementById('submit').disabled = false
-    // }, [id, password])
-
     const handleLogin = async () => {
         if (!id) {
-            setStatus({
-                type: 'error',
-                msg: 'Missing student ID',
-            })
-        } else if (!password) {
-            setStatus({
-                type: 'error',
-                msg: 'Missing password',
-            })
-            alert('Missing password')
-        } else {
-            const {
-                data: { message, content },
-            } = await instance.post('/login', {
+            antMessage.error({ content: 'Missing student ID', duration: 1 })
+            return
+        }
+        if (!password) {
+            antMessage.error({ content: 'Missing password', duration: 1 })
+            return
+        }
+
+        try {
+            const { data: { message, content } } = await instance.post('/login', {
                 userId: id,
                 password: password,
             })
 
-            switch (message) {
-                default:
-                    break
-                case 'error':
-                    setStatus({
-                        type: 'error',
-                        msg: content,
-                    })
-                    alert(content)
-                    break
-                case 'success':
-                    localStorage.setItem('token', content.token)
-                    setMe(content.name)
-                    setLogin(true)
-                    setSignIn(true)
-                    localStorage.setItem(LOCALSTORAGE_ID_KEY, id)
-                    localStorage.setItem(
-                        LOCALSTORAGE_NAME_KEY,
-                        content.name
-                    )
-                    localStorage.setItem(LOCALSTORAGE_STATUS, 'login')
-                    setStatus({
-                        type: 'success',
-                        msg: 'Login successfully!',
-                    })
-                    setCollapsed(false)
-                    navigate('/')
-                    break
+            if (message === 'success') {
+                login(content)
+                setCollapsed(false)
+                navigate('/')
+                antMessage.success({ content: 'Login successfully!', duration: 1 })
+            } else {
+                antMessage.error({ content: content, duration: 1 })
             }
+        } catch (err) {
+            const msg = err.response?.data?.content || 'Login failed'
+            antMessage.error({ content: msg, duration: 1 })
         }
     }
 
