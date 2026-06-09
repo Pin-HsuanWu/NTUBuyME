@@ -7,7 +7,6 @@ const UserSchema = Schema(
         user_id: { type: String, required: true, unique: true },
         name: { type: String, required: true },
         password: { type: String, required: true },
-        tasks: [{ type: mongoose.Types.ObjectId, ref: 'Task' }],
         bankaccount: {
             bank_id: { type: String },
             bankaccount_id: { type: String },
@@ -62,8 +61,9 @@ const ChatBoxSchema = new Schema({
     },
     title: { type: String, required: true },
     messages: [{ type: mongoose.Types.ObjectId, ref: 'Message' }],
-    due_period: { type: String, required: true },
-    fee: { type: String, required: true },
+    due_start: { type: Date, required: true },
+    due_end: { type: Date, required: true },
+    fee: { type: Number, required: true },
     from: { type: String, required: true },
     task_id: { type: mongoose.Types.ObjectId, ref: 'Task', required: true },
 })

@@ -163,11 +163,8 @@ exports.AcceptTasks = async (req, res) => {
         title: task.title,
         sender: task.sender,
         receiver: user,
-        due_period: `${task.due_start.toDateString()} ${task.due_start
-            .toTimeString()
-            .split(' ', 1)} ~ ${task.due_end.toDateString()} ${task.due_end
-            .toTimeString()
-            .split(' ', 1)}`,
+        due_start: task.due_start,
+        due_end: task.due_end,
         fee: task.fee,
         from: senderName,
         task_id: task._id,
