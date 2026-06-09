@@ -7,89 +7,54 @@ import Account from './pages/Account'
 import MainPage from './pages/MainPage'
 import Register from './pages/Register'
 import NavBar from './containers/NavBar'
-import { Route, Routes, useLocation } from 'react-router-dom'
+import ProtectedRoute from './containers/ProtectedRoute'
+import { Route, Routes, useLocation, Navigate } from 'react-router-dom'
 import MyTasks from './pages/MyTasks'
 import { useApp } from './UseApp'
 import { Layout } from 'antd'
-import { useEffect } from 'react'
 
 function App() {
-    const [login, setLogin] = useState(false)
     const [collapsed, setCollapsed] = useState(false)
     const { pathname } = useLocation()
-    const { me, id, setStatus, client, key, setKey } = useApp()
+    const { me, id, signIn } = useApp()
 
     return (
         <Layout>
             {pathname !== '/login' && pathname !== '/register' && (
-                <NavBar setKey={setKey} collapsed={collapsed} />
+                <NavBar collapsed={collapsed} />
             )}
             <Routes>
-                <Route
-                    path="/login"
-                    element={
-                        <Login
-                            setLogin={setLogin}
-                            setCollapsed={setCollapsed}
-                        />
-                    }
-                />
-                <Route
-                    path="/"
-                    element={
-                        <MainPage
-                            collapsed={collapsed}
-                            setCollapsed={setCollapsed}
-                            login={login}
-                            me={me}
-                            setStatus={setStatus}
-                        ></MainPage>
-                    }
-                />
-
-                <Route
-                    path="/register"
-                    element={<Register setLogin={setLogin} />}
-                />
-                <Route
-                    path="/mytasks"
-                    element={
-                        <MyTasks
-                            collapsed={collapsed}
-                            setCollapsed={setCollapsed}
-                        />
-                    }
-                />
-                <Route
-                    path="/chat"
-                    element={
-                        <Chat
-                            collapsed={collapsed}
-                            setCollapsed={setCollapsed}
-                            c={client}
-                        />
-                    }
-                />
-                <Route
-                    path="/transfer"
-                    element={
-                        <Transfer
-                            collapsed={collapsed}
-                            setCollapsed={setCollapsed}
-                        />
-                    }
-                />
-                <Route
-                    path="/account"
-                    element={
-                        <Account
-                            collapsed={collapsed}
-                            setCollapsed={setCollapsed}
-                            me={me}
-                            id={id}
-                        />
-                    }
-                />
+                <Route path="/login" element={
+                    signIn ? <Navigate to="/" replace /> : <Login setCollapsed={setCollapsed} />
+                } />
+                <Route path="/register" element={
+                    signIn ? <Navigate to="/" replace /> : <Register />
+                } />
+                <Route path="/" element={
+                    <ProtectedRoute>
+                        <MainPage collapsed={collapsed} setCollapsed={setCollapsed} me={me} />
+                    </ProtectedRoute>
+                } />
+                <Route path="/mytasks" element={
+                    <ProtectedRoute>
+                        <MyTasks collapsed={collapsed} setCollapsed={setCollapsed} />
+                    </ProtectedRoute>
+                } />
+                <Route path="/chat" element={
+                    <ProtectedRoute>
+                        <Chat collapsed={collapsed} setCollapsed={setCollapsed} />
+                    </ProtectedRoute>
+                } />
+                <Route path="/transfer" element={
+                    <ProtectedRoute>
+                        <Transfer collapsed={collapsed} setCollapsed={setCollapsed} />
+                    </ProtectedRoute>
+                } />
+                <Route path="/account" element={
+                    <ProtectedRoute>
+                        <Account collapsed={collapsed} setCollapsed={setCollapsed} me={me} id={id} />
+                    </ProtectedRoute>
+                } />
             </Routes>
         </Layout>
     )

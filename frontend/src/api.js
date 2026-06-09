@@ -20,7 +20,7 @@ instance.interceptors.response.use(
     (error) => {
         if (error.response && error.response.status === 401) {
             localStorage.removeItem('token');
-            window.location.href = '/login';
+            window.dispatchEvent(new Event('auth:logout'));
         }
         return Promise.reject(error);
     }

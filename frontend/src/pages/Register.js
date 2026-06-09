@@ -1,7 +1,7 @@
 import React from 'react'
 import { useState } from 'react'
-import { useApp } from '../UseApp'
-import { Button, Form, Input, Select, Layout, Divider } from 'antd'
+import { useAuth } from '../contexts/AuthContext'
+import { Button, Form, Input, Select, Layout, Divider, message as antMessage } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import { instance } from '../api'
 
@@ -14,38 +14,32 @@ const layout = {
     },
 }
 
-const { Header, Content } = Layout
+const { Content } = Layout
 
 
-const Register = ({ setLogin }) => {
+const Register = () => {
     const [password, setPassword] = useState('')
-    const { setStatus, setId, setMe, setSignIn } = useApp()
+    const { login } = useAuth()
     const [form] = Form.useForm()
 
     const navigate = useNavigate()
 
-    const navigateToMainPage = () => {
-        navigate('/')
-    }
-
     const onFinish = async (value) => {
         value.user.id = value.user.id.toUpperCase()
 
-        const {
-            data: { message, content },
-        } = await instance.post('/register', value)
+        try {
+            const { data: { message, content } } = await instance.post('/register', value)
 
-        setStatus({
-            type: message,
-            msg: message === 'success' ? 'Account created!' : content,
-        })
-        if (message === 'success') {
-            localStorage.setItem('token', content.token)
-            setId(content.id)
-            setMe(content.name)
-            setSignIn(true)
-            setLogin(true)
-            navigateToMainPage()
+            if (message === 'success') {
+                login(content)
+                antMessage.success({ content: 'Account created!', duration: 1 })
+                navigate('/')
+            } else {
+                antMessage.error({ content: content, duration: 1 })
+            }
+        } catch (err) {
+            const msg = err.response?.data?.content || 'Registration failed'
+            antMessage.error({ content: msg, duration: 1 })
         }
         form.resetFields()
     }
