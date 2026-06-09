@@ -4,24 +4,35 @@ import { ChatBoxModel } from '../models/BuyMe'
 import { TASK_STATUS, canTransition } from '../utils/taskStatus'
 
 exports.FilterTasksByDueStart = async (req, res) => {
-    const nPerPage = req.query.nPerPage
-    const maxPageN = req.query.maxPageN
-    const allTasks = await TaskModel.find({ status: 'open' }) //status: 'open'
-        .sort({ due_start: 1 })
-        .limit(maxPageN * nPerPage)
+    const page = Math.max(parseInt(req.query.page) || 1, 1)
+    const limit = Math.min(parseInt(req.query.limit) || 20, 100)
+    const skip = (page - 1) * limit
 
-    res.send({ allTasks })
+    const [allTasks, total] = await Promise.all([
+        TaskModel.find({ status: 'open' })
+            .sort({ due_start: 1 })
+            .skip(skip)
+            .limit(limit),
+        TaskModel.countDocuments({ status: 'open' }),
+    ])
+
+    res.send({ allTasks, total, page, totalPages: Math.ceil(total / limit) })
 }
 
 exports.FilterTasksByFee = async (req, res) => {
-    const nPerPage = req.query.nPerPage
-    const maxPageN = req.query.maxPageN
+    const page = Math.max(parseInt(req.query.page) || 1, 1)
+    const limit = Math.min(parseInt(req.query.limit) || 20, 100)
+    const skip = (page - 1) * limit
 
-    const allTasks = await TaskModel.find({ status: 'open' })
-        .sort({ fee: -1 })
-        .limit(maxPageN * nPerPage)
+    const [allTasks, total] = await Promise.all([
+        TaskModel.find({ status: 'open' })
+            .sort({ fee: -1 })
+            .skip(skip)
+            .limit(limit),
+        TaskModel.countDocuments({ status: 'open' }),
+    ])
 
-    res.send({ allTasks })
+    res.send({ allTasks, total, page, totalPages: Math.ceil(total / limit) })
 }
 
 exports.DeleteAllTasks = async (_, res) => {
@@ -35,10 +46,10 @@ exports.GetTaskNum = async (_, res) => {
     const offset = new Date(Date.now())
     const DayRange = 2
     offset.setDate(offset.getDate() - DayRange)
-    const taskNum = await TaskModel.find({
+    const taskNum = await TaskModel.countDocuments({
         status: 'open',
         created_at: { $gt: offset },
-    }).count()
+    })
     res.send({ taskNum })
 }
 
@@ -65,33 +76,35 @@ exports.AddDummyTasks = async (_, res) => {
 }
 
 exports.GetMyAddedTasks = async (req, res) => {
-    const currentPage = req.query.currentPage
-    const nPerPage = req.query.nPerPage
-    const maxPageN = req.query.maxPageN
+    const page = Math.max(parseInt(req.query.page) || 1, 1)
+    const limit = Math.min(parseInt(req.query.limit) || 20, 100)
+    const skip = (page - 1) * limit
     const id = req.query.id
     const myUserModel = await UserModel.findOne({ user_id: id })
 
-    const myTasks = await TaskModel.find({
-        sender: myUserModel,
-        status: { $in: ['accepted', 'completed'] },
-    }).sort({ status: 1, due_end: 1 })
-    const taskOverload = myTasks.length === maxPageN * nPerPage + 1
-    res.send({ myTasks, taskOverload })
+    const filter = { sender: myUserModel._id, status: { $in: ['accepted', 'completed'] } }
+    const [myTasks, total] = await Promise.all([
+        TaskModel.find(filter).sort({ status: 1, due_end: 1 }).skip(skip).limit(limit),
+        TaskModel.countDocuments(filter),
+    ])
+
+    res.send({ myTasks, total, page, totalPages: Math.ceil(total / limit) })
 }
 
 exports.GetMyAcceptedTasks = async (req, res) => {
-    const currentPage = req.query.currentPage
-    const nPerPage = req.query.nPerPage
-    const maxPageN = req.query.maxPageN
+    const page = Math.max(parseInt(req.query.page) || 1, 1)
+    const limit = Math.min(parseInt(req.query.limit) || 20, 100)
+    const skip = (page - 1) * limit
     const id = req.query.id
     const myUserModel = await UserModel.findOne({ user_id: id })
-    const myTasks = await TaskModel.find({
-        receiver: myUserModel,
-        status: { $in: ['accepted', 'completed'] },
-    }).sort({ status: 1, due_end: 1 })
 
-    const taskOverload = myTasks.length === maxPageN * nPerPage + 1
-    res.send({ myTasks, taskOverload })
+    const filter = { receiver: myUserModel._id, status: { $in: ['accepted', 'completed'] } }
+    const [myTasks, total] = await Promise.all([
+        TaskModel.find(filter).sort({ status: 1, due_end: 1 }).skip(skip).limit(limit),
+        TaskModel.countDocuments(filter),
+    ])
+
+    res.send({ myTasks, total, page, totalPages: Math.ceil(total / limit) })
 }
 
 exports.CreateTask = async (req, res) => {
