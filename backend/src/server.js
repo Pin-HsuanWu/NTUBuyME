@@ -41,12 +41,11 @@ if (process.env.NODE_ENV === 'production') {
     })
 }
 
-const port = process.env.PORT || 4000
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
-
 const server = http.createServer(app)
+
 const wss = new WebSocket.Server({
     server,
+    path: '/ws',
     verifyClient: (info, done) => {
         const url = new URL(info.req.url, `http://${info.req.headers.host}`)
         const token = url.searchParams.get('token')
@@ -69,7 +68,7 @@ mongoose
         useUnifiedTopology: true,
         dbName: 'NTUBuyMe',
     })
-    .then((res) => {
+    .then(() => {
         wss.on('connection', (ws, req) => {
             ws.box = ''
             ws.id = randomUUID()
@@ -86,6 +85,7 @@ mongoose
         })
     })
 
-server.listen(8080, () => {
-    console.log('listening on port 8080')
+const port = process.env.PORT || 4000
+server.listen(port, () => {
+    console.log(`Server listening on port ${port}`)
 })

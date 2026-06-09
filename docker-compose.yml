@@ -5,7 +5,6 @@ services:
       dockerfile: Dockerfile.dev
     ports:
       - "4100:4000"
-      - "8180:8080"
     environment:
       - MONGO_URL=mongodb://mongo:27017/NTUBuyMe
       - JWT_SECRET=dev-secret-key
