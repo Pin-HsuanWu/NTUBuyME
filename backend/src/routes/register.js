@@ -1,6 +1,6 @@
 import { UserModel } from '../models/BuyMe'
 import bcrypt from 'bcrypt'
-import { generateToken } from '../middleware/auth'
+import { generateAccessToken, generateRefreshToken, setRefreshCookie } from '../middleware/auth'
 import { encrypt } from '../utils/crypto'
 
 const SALT_ROUNDS = 10
@@ -22,7 +22,9 @@ exports.UserRegister = async (req, res) => {
                            bankaccount_id: encrypt(bankaccount_id) },
         })
         await user.save()
-        const token = generateToken(id)
+        const token = generateAccessToken(id)
+        const refreshToken = generateRefreshToken(id)
+        setRefreshCookie(res, refreshToken)
         res.status(200).send({
             message: 'success',
             content: {

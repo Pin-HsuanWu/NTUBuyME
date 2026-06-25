@@ -9,6 +9,7 @@ import { randomUUID } from 'crypto'
 import path from 'path'
 import jwt from 'jsonwebtoken'
 import logger from './utils/logger'
+import cookieParser from 'cookie-parser'
 
 require('dotenv').config()
 
@@ -20,6 +21,7 @@ app.use(cors({
 }))
 
 app.use(express.json())
+app.use(cookieParser())
 
 routes(app)
 
