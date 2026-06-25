@@ -1,5 +1,4 @@
 exports.GetQRCode = async (req, res) =>  {
-    console.log(req.query.account)
     const bank = req.query.account.bank_id;
     const account = req.query.account.bankaccount_id;
 
