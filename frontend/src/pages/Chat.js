@@ -213,7 +213,7 @@ function Chat({ collapsed, setCollapsed }) {
                                     onClick={() => OnChatRoom(element)}
                                 >
                                     <p>發起人： {element.from}</p>
-                                    <p>期間： {element.due_period}</p>
+                                    <p>期間： {new Date(element.due_start).toLocaleString()} ~ {new Date(element.due_end).toLocaleString()}</p>
                                     <p>費用: {element.fee}</p>
                                 </Card>
                             )}
