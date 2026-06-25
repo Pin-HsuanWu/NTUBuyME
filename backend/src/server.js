@@ -8,6 +8,7 @@ import wsConnect from './wsConnect'
 import { randomUUID } from 'crypto'
 import path from 'path'
 import jwt from 'jsonwebtoken'
+import logger from './utils/logger'
 
 require('dotenv').config()
 
@@ -24,9 +25,7 @@ routes(app)
 
 app.use((err, req, res, next) => {
     const statusCode = err.statusCode || 500
-    if (process.env.NODE_ENV !== 'production') {
-        console.error(err)
-    }
+    logger.error({ err, statusCode }, 'Request error')
     res.status(statusCode).json({
         message: 'error',
         content: err.message || 'Internal server error',
@@ -79,7 +78,7 @@ mongoose
                 wsConnect.unregisterClient(ws)
             })
             ws.on('error', (err) => {
-                console.warn(`Client disconnected - reason: ${err}`)
+                logger.warn({ err: err.message }, 'Client disconnected')
                 wsConnect.unregisterClient(ws)
             })
         })
@@ -87,5 +86,5 @@ mongoose
 
 const port = process.env.PORT || 4000
 server.listen(port, () => {
-    console.log(`Server listening on port ${port}`)
+    logger.info({ port }, 'Server listening')
 })

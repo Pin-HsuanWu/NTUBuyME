@@ -1,5 +1,6 @@
 import { ChatBoxModel, UserModel, TaskModel } from '../models/BuyMe'
 import { TASK_STATUS, canTransition } from '../utils/taskStatus'
+import logger from '../utils/logger'
 
 exports.GetChat = async (req, res) => {
     const id = req.query.id
@@ -37,13 +38,13 @@ exports.FulfillOrder = async (req, res) => {
             { status: TASK_STATUS.COMPLETED }
         )
     } catch (e) {
-        console.log(e)
+        logger.error({ err: e }, 'FulfillOrder error')
     }
 
     try {
         await ChatBoxModel.findOneAndDelete({ task_id: taskID })
     } catch (e) {
-        console.log(e)
+        logger.error({ err: e }, 'FulfillOrder error')
     }
 
     const user = await UserModel.findOne({ user_id: userID })
