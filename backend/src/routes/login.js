@@ -1,6 +1,6 @@
 import { UserModel } from '../models/BuyMe'
 import bcrypt from 'bcrypt'
-import { generateToken } from '../middleware/auth'
+import { generateAccessToken, generateRefreshToken, setRefreshCookie } from '../middleware/auth'
 
 exports.UserLogin = async (req, res) => {
     const { userId, password } = req.body
@@ -15,7 +15,10 @@ exports.UserLogin = async (req, res) => {
         })
     }
 
-    const token = generateToken(user.user_id)
+    const token = generateAccessToken(user.user_id)
+    const refreshToken = generateRefreshToken(user.user_id)
+    setRefreshCookie(res, refreshToken)
+
     res.status(200).send({
         message: 'success',
         content: {

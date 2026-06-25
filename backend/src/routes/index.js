@@ -5,7 +5,7 @@ import transferRoute from './transfer'
 import buymeRoute from './task'
 import chatRoute from './chat'
 import qrCodeRoute from './qrcode'
-import { authMiddleware } from '../middleware/auth'
+import { authMiddleware, refreshMiddleware } from '../middleware/auth'
 import { authLimiter, apiLimiter } from '../middleware/rateLimit'
 import { body } from 'express-validator'
 import { validate } from '../middleware/validate'
@@ -41,6 +41,7 @@ function main(app) {
     // Public routes (strict rate limit)
     app.post('/api/login', authLimiter, loginValidation, wrap(loginRoute.UserLogin))
     app.post('/api/register', authLimiter, registerValidation, wrap(registerRoute.UserRegister))
+    app.post('/api/refresh', authLimiter, refreshMiddleware)
 
     // Protected routes
     app.use('/api', apiLimiter)
